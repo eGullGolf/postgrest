@@ -13,6 +13,8 @@ import           PostgREST.DbStructure
 import           Control.Monad
 import           Data.Monoid                          ((<>))
 import           Data.String.Conversions              (cs)
+import           Data.Text                            (stripPrefix,
+                                                       pack, unpack)
 import qualified Hasql.Query                          as H
 import qualified Hasql.Session                        as H
 import qualified Hasql.Decoders                       as HD
@@ -22,7 +24,6 @@ import           Network.Wai.Handler.Warp
 import           System.IO                            (BufferMode (..),
                                                        hSetBuffering, stderr,
                                                        stdin, stdout)
-import           Web.JWT                              (secret)
 import           Data.IORef
 #ifndef mingw32_HOST_OS
 import           Control.Monad.IO.Class               (liftIO)
@@ -46,14 +47,14 @@ main = do
   hSetBuffering stdin  LineBuffering
   hSetBuffering stderr NoBuffering
 
-  conf <- readOptions
+  conf <- loadSecretFile =<< readOptions
   let port = configPort conf
       pgSettings = cs (configDatabase conf)
       appSettings = setPort port
                   . setServerName (cs $ "postgrest/" <> prettyVersion)
                   $ defaultSettings
 
-  unless (secret "secret" /= configJwtSecret conf) $
+  unless ("secret" /= configJwtSecret conf) $
     putStrLn "WARNING, running in insecure mode, JWT secret is the default value"
   Prelude.putStrLn $ "Listening on port " ++
     (show $ configPort conf :: String)
@@ -85,3 +86,11 @@ main = do
 #endif
 
   runSettings appSettings $ postgrest conf refDbStructure pool
+
+loadSecretFile :: AppConfig -> IO AppConfig
+loadSecretFile conf = do
+  let s = configJwtSecret conf
+  real <- case stripPrefix "@" s of
+            Nothing -> return s -- the string is the secret, not a filename
+            Just filename -> pack <$> readFile ( unpack filename )
+  return conf { configJwtSecret = real }
