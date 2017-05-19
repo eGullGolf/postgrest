@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+## [0.3.3.0] - 2017-05-19
+
+- Allow to read binary secret from a file #495, #876 - @eric-brechemier
+
 ### Fixed
 
 ## [0.3.2.0] - 2016-06-10
