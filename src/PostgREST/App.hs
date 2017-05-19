@@ -28,7 +28,6 @@ import           Network.HTTP.Types.Status
 import           Network.HTTP.Types.URI    (renderSimpleQuery)
 import           Network.Wai
 import           Network.Wai.Middleware.RequestLogger (logStdout)
-import           Web.JWT                   (secret)
 
 import           Data.Aeson
 import           Data.Aeson.Types (emptyArray)
@@ -76,7 +75,7 @@ postgrest conf refDbStructure pool =
 
     let schema = cs $ configSchema conf
         apiRequest = userApiRequest schema req body
-        eClaims = jwtClaims (secret $ configJwtSecret conf) (iJWT apiRequest) time
+        eClaims = jwtClaims (configJwtSecret conf) (iJWT apiRequest) time
         authed = containsRole eClaims
         handleReq = runWithClaims conf eClaims (app dbStructure conf) apiRequest
         txMode = transactionMode $ iAction apiRequest
@@ -193,7 +192,7 @@ app dbStructure conf apiRequest =
       if exists
         then do
           let p = V.head payload
-              jwtSecret = secret $ configJwtSecret conf
+              jwtSecret = configJwtSecret conf
           respondToRange $ do
             row <- H.query () (callProc qi p topLevelRange shouldCount)
             returnJWT <- H.query qi doesProcReturnJWT
