@@ -41,6 +41,7 @@ data AppConfig = AppConfig {
   , configSchema    :: String
   , configPort      :: Int
   , configJwtSecret :: Secret
+  , configJwtSecretPath :: String
   , configPool      :: Int
   , configMaxRows   :: Maybe Integer
   , configQuiet     :: Bool
@@ -53,6 +54,7 @@ argParser = AppConfig
   <*> strOption    (long "schema"     <> short 's' <> help "schema to use for API routes" <> metavar "NAME" <> value "public" <> showDefault)
   <*> option auto  (long "port"       <> short 'p' <> help "port number on which to run HTTP server" <> metavar "PORT" <> value 3000 <> showDefault)
   <*> (secret . pack <$> strOption (long "jwt-secret" <> short 'j' <> help "secret used to encrypt and decrypt JWT tokens" <> metavar "SECRET" <> value "secret" <> showDefault))
+  <*> strOption    (long "jwt-secret-path" <> short 'w' <> help "path to read the JWT secret from a file (optional)" <> metavar "PATH" <> value "/dev/null")
   <*> option auto  (long "pool"       <> short 'o' <> help "max connections in database pool" <> metavar "COUNT" <> value 10 <> showDefault)
   <*> (readMay <$> strOption  (long "max-rows"   <> short 'm' <> help "max rows in response" <> metavar "COUNT" <> value "infinity" <> showDefault))
   <*> pure False

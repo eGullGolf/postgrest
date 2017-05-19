@@ -12,6 +12,7 @@ import           PostgREST.DbStructure
 
 import           Control.Monad
 import           Data.Monoid                          ((<>))
+import qualified Data.ByteString                      as BS
 import           Data.String.Conversions              (cs)
 import qualified Hasql.Query                          as H
 import qualified Hasql.Session                        as H
@@ -22,7 +23,7 @@ import           Network.Wai.Handler.Warp
 import           System.IO                            (BufferMode (..),
                                                        hSetBuffering, stderr,
                                                        stdin, stdout)
-import           Web.JWT                              (secret)
+import           Web.JWT                              (binarySecret, secret)
 import           Data.IORef
 #ifndef mingw32_HOST_OS
 import           Control.Monad.IO.Class               (liftIO)
@@ -46,7 +47,7 @@ main = do
   hSetBuffering stdin  LineBuffering
   hSetBuffering stderr NoBuffering
 
-  conf <- readOptions
+  conf <- optionallyLoadSecretFile =<< readOptions
   let port = configPort conf
       pgSettings = cs (configDatabase conf)
       appSettings = setPort port
@@ -85,3 +86,12 @@ main = do
 #endif
 
   runSettings appSettings $ postgrest conf refDbStructure pool
+
+optionallyLoadSecretFile :: AppConfig -> IO AppConfig
+optionallyLoadSecretFile conf = loadSecretFile (configJwtSecretPath conf) conf
+
+loadSecretFile :: String -> AppConfig -> IO AppConfig
+loadSecretFile "/dev/null" conf = return conf
+loadSecretFile path conf = do
+  binaryJwtSecret <- binarySecret <$> BS.readFile path
+  return conf { configJwtSecret = binaryJwtSecret }
