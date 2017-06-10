@@ -127,6 +127,7 @@ Test-Suite spec
                      , Feature.SingularSpec
                      , Feature.StructureSpec
                      , Feature.UnicodeSpec
+                     , Feature.Utf8JwtSecretSpec
                      , Feature.AndOrParamsSpec
                      , SpecHelper
                      , TestTypes

@@ -26,6 +26,7 @@ import qualified Feature.RangeSpec
 import qualified Feature.StructureSpec
 import qualified Feature.SingularSpec
 import qualified Feature.UnicodeSpec
+import qualified Feature.Utf8JwtSecretSpec
 import qualified Feature.ProxySpec
 import qualified Feature.AndOrParamsSpec
 
@@ -50,6 +51,7 @@ main = do
       proxyApp     = return $ postgrest (testProxyCfg testDbConn)     refDbStructure pool getTime $ pure ()
       noJwtApp     = return $ postgrest (testCfgNoJWT testDbConn)     refDbStructure pool getTime $ pure ()
       asciiJwtApp  = return $ postgrest (testCfgAsciiJWT testDbConn)  refDbStructure pool getTime $ pure ()
+      utf8JwtApp   = return $ postgrest (testCfgUtf8JWT testDbConn)  refDbStructure pool getTime $ pure ()
       binaryJwtApp = return $ postgrest (testCfgBinaryJWT testDbConn) refDbStructure pool getTime $ pure ()
 
   let reset = resetDb testDbConn
@@ -75,6 +77,10 @@ main = do
     -- this test runs with an ASCII plain text JWT secret
     beforeAll_ reset . before asciiJwtApp $
       describe "Feature.AsciiJwtSecretSpec" Feature.AsciiJwtSecretSpec.spec
+
+    -- this test runs with a Utf-8 Unicode JWT secret
+    beforeAll_ reset . before utf8JwtApp $
+      describe "Feature.Utf8JwtSecretSpec" Feature.Utf8JwtSecretSpec.spec
 
     -- this test runs with a binary JWT secret
     beforeAll_ reset . before binaryJwtApp $

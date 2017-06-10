@@ -82,6 +82,9 @@ testCfgNoJWT testDbConn = (testCfg testDbConn) { configJwtSecret = Nothing }
 testCfgAsciiJWT :: Text -> AppConfig
 testCfgAsciiJWT testDbConn = (testCfg testDbConn) { configJwtSecret = Just "A B C\nIt's easy as, 1 2 3" }
 
+testCfgUtf8JWT :: Text -> AppConfig
+testCfgUtf8JWT testDbConn = (testCfg testDbConn) { configJwtSecret = (Just $ encodeUtf8 "⚠️ ⚠︎ Unicode ☠️ ☠") }
+
 testUnicodeCfg :: Text -> AppConfig
 testUnicodeCfg testDbConn = (testCfg testDbConn) { configSchema = "تست" }
 
