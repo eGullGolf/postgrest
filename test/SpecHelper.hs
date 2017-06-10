@@ -79,6 +79,9 @@ testCfg testDbConn = _baseCfg { configDatabase = testDbConn }
 testCfgNoJWT :: Text -> AppConfig
 testCfgNoJWT testDbConn = (testCfg testDbConn) { configJwtSecret = Nothing }
 
+testCfgAsciiJWT :: Text -> AppConfig
+testCfgAsciiJWT testDbConn = (testCfg testDbConn) { configJwtSecret = Just "A B C\nIt's easy as, 1 2 3" }
+
 testUnicodeCfg :: Text -> AppConfig
 testUnicodeCfg testDbConn = (testCfg testDbConn) { configSchema = "تست" }
 

@@ -12,6 +12,7 @@ import Data.Function (id)
 import Data.IORef
 import Data.Time.Clock.POSIX   (getPOSIXTime)
 
+import qualified Feature.AsciiJwtSecretSpec
 import qualified Feature.AuthSpec
 import qualified Feature.BinaryJwtSecretSpec
 import qualified Feature.ConcurrentSpec
@@ -48,6 +49,7 @@ main = do
       unicodeApp   = return $ postgrest (testUnicodeCfg testDbConn)   refDbStructure pool getTime $ pure ()
       proxyApp     = return $ postgrest (testProxyCfg testDbConn)     refDbStructure pool getTime $ pure ()
       noJwtApp     = return $ postgrest (testCfgNoJWT testDbConn)     refDbStructure pool getTime $ pure ()
+      asciiJwtApp  = return $ postgrest (testCfgAsciiJWT testDbConn)  refDbStructure pool getTime $ pure ()
       binaryJwtApp = return $ postgrest (testCfgBinaryJWT testDbConn) refDbStructure pool getTime $ pure ()
 
   let reset = resetDb testDbConn
@@ -69,6 +71,10 @@ main = do
     -- this test runs without a JWT secret
     beforeAll_ reset . before noJwtApp $
       describe "Feature.NoJwtSpec" Feature.NoJwtSpec.spec
+
+    -- this test runs with an ASCII plain text JWT secret
+    beforeAll_ reset . before asciiJwtApp $
+      describe "Feature.AsciiJwtSecretSpec" Feature.AsciiJwtSecretSpec.spec
 
     -- this test runs with a binary JWT secret
     beforeAll_ reset . before binaryJwtApp $
