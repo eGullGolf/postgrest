@@ -20,7 +20,8 @@ import           Data.ByteString.Base64   (decode)
 import           Data.IORef               (IORef, atomicWriteIORef,
                                            newIORef, readIORef)
 import           Data.String              (IsString (..))
-import           Data.Text                (pack, replace, stripPrefix, strip)
+import           Data.Text                (pack, replace, stripPrefix, strip,
+                                           dropWhileEnd)
 import           Data.Text.Encoding       (decodeUtf8, encodeUtf8)
 import           Data.Text.IO             (hPutStrLn, readFile)
 import qualified Hasql.Decoders           as HD
@@ -230,6 +231,11 @@ main = do
          refDbStructure
          refIsWorkerOn)
 
+isEOL :: Char -> Bool
+isEOL '\n' = True
+isEOL '\r' = True
+isEOL _ = False
+
 {-|
   The purpose of this function is to load the JWT secret from a file if
   configJwtSecret is actually a filepath and replaces some characters if the JWT
@@ -269,7 +275,7 @@ loadSecretFile conf = extractAndTransform mSecret
     --
     -- Turns the Base64url encoded JWT into Base64
     transformString :: Bool -> Text -> IO ByteString
-    transformString False t = return . encodeUtf8 $ t
+    transformString False t = return . encodeUtf8 $ dropWhileEnd isEOL $ t
     transformString True t =
       case decode (encodeUtf8 $ strip $ replaceUrlChars t) of
         Left errMsg -> panic $ pack errMsg
